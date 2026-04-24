@@ -1,146 +1,368 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { forwardRef, useRef } from 'react';
-import { motion } from 'motion/react';
-import Draggable from 'react-draggable';
-import { DeviceConfig } from '../types';
+import React, { forwardRef, useRef } from "react";
+import { motion } from "motion/react";
+import Draggable from "react-draggable";
+import { DeviceConfig } from "../types";
 
 interface DeviceFrameProps {
   config: DeviceConfig;
   imageUrl: string | null;
   isSafeAreaEnabled: boolean;
+  zoom: number;
+  theme?: "light" | "dark";
+  onReset?: () => void;
 }
 
+const Placeholder = ({ theme }: { theme?: "light" | "dark" }) => (
+  <div
+    className={`absolute inset-0 flex flex-col items-center justify-center text-center p-6 ${theme === "light" ? "bg-white" : "bg-[#0a0a0a]"}`}
+  >
+    <div
+      className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 border ${theme === "light" ? "bg-indigo-50 border-indigo-100" : "bg-indigo-500/20 border-indigo-500/30"}`}
+    >
+      <svg
+        className="w-6 h-6 text-indigo-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
+      </svg>
+    </div>
+    <p
+      className={`text-xs font-medium uppercase tracking-widest leading-relaxed ${theme === "light" ? "text-slate-400" : "text-slate-500"}`}
+    >
+      Upload to preview <br />
+      <span className="opacity-50 text-[10px]">High Resolution</span>
+    </p>
+  </div>
+);
+
+const MobileScreen = ({
+  config,
+  imageUrl,
+  isSafeAreaEnabled,
+  zoom,
+  position,
+  handleDrag,
+  handleReset,
+  handleStart,
+  handleTouchStart,
+  handleTouchMove,
+  handleTouchEnd,
+  canDrag,
+  isMobile,
+  draggableNodeRef,
+  theme,
+}: any) => {
+  return (
+    <>
+      <div
+        className={`absolute inset-0 z-0 flex items-center justify-center overflow-hidden ${theme === "light" ? "bg-white" : "bg-[#0a0a0a]"}`}
+        style={{
+          ...config.screenStyle,
+          borderRadius: `calc(${config.frameStyle.borderRadius} - 4px)`,
+        }}
+      >
+        {imageUrl ? (
+          <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
+            <Draggable
+              nodeRef={draggableNodeRef}
+              position={position}
+              onDrag={handleDrag}
+              onStart={handleStart}
+            >
+              <div
+                ref={draggableNodeRef}
+                className={`cursor-move absolute ${isMobile && canDrag ? "z-50" : ""}`}
+                onDoubleClick={handleReset}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                style={{
+                  paddingTop: isSafeAreaEnabled
+                    ? `${config.safeAreaHeight}px`
+                    : "0",
+                }}
+              >
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="pointer-events-none select-none block transition-transform duration-200 ease-out max-w-none"
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    minHeight: "100%",
+                    objectFit: "cover",
+                    transform: `scale(${zoom || 1})`,
+                  }}
+                  crossOrigin={
+                    imageUrl?.startsWith("http") ? "anonymous" : undefined
+                  }
+                />
+              </div>
+            </Draggable>
+          </div>
+        ) : (
+          <Placeholder />
+        )}
+
+        <div className="absolute top-0 left-0 right-0 h-6 flex items-center justify-between px-6 z-[60] pointer-events-none">
+          <div
+            className={`text-[10px] font-bold tracking-tight ${theme === "light" ? "text-slate-900/60" : "text-white/40"}`}
+          >
+            9:41
+          </div>
+          <div
+            className={`flex gap-1 items-center ${theme === "light" ? "opacity-60" : "opacity-40"}`}
+          >
+            <div
+              className={`w-3.5 h-1.5 border rounded-[2px] ${theme === "light" ? "border-slate-900" : "border-white"}`}
+            />
+            <div
+              className={`w-1.5 h-1.5 rounded-full ${theme === "light" ? "bg-slate-900" : "bg-white"}`}
+            />
+          </div>
+        </div>
+
+        {config.camera.type === "punch-hole" && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#050505] rounded-full z-[70] shadow-inner flex items-center justify-center border border-white/5">
+            <div className="w-1 h-1 bg-indigo-900/40 rounded-full blur-[0.5px]"></div>
+          </div>
+        )}
+        {config.camera.type === "notch" && (
+          <div
+            className="absolute left-1/2 -translate-x-1/2 bg-black z-[70] flex items-center justify-center top-3 rounded-full"
+            style={{ width: "75px", height: "20px" }}
+          >
+            <div className="flex gap-4 items-center">
+              <div className="h-1 bg-white/10 rounded-full w-6" />
+              <div className="w-1.5 h-1.5 bg-indigo-900/40 rounded-full" />
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none rounded-[inherit] z-40" />
+    </>
+  );
+};
+
+const LaptopScreen = ({
+  config,
+  imageUrl,
+  isSafeAreaEnabled,
+  zoom,
+  position,
+  handleDrag,
+  handleReset,
+  handleStart,
+  handleTouchStart,
+  handleTouchMove,
+  handleTouchEnd,
+  canDrag,
+  isMobile,
+  draggableNodeRef,
+  theme,
+}: any) => {
+  return (
+    <>
+      <div
+        className={`absolute inset-0 z-0 flex items-center justify-center overflow-hidden ${theme === "light" ? "bg-white" : "bg-[#0a0a0a]"}`}
+        style={{
+          ...config.screenStyle,
+          borderRadius: `calc(${config.frameStyle.borderRadius} - 4px)`,
+        }}
+      >
+        {imageUrl ? (
+          <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
+            <Draggable
+              nodeRef={draggableNodeRef}
+              position={position}
+              onDrag={handleDrag}
+              onStart={handleStart}
+            >
+              <div
+                ref={draggableNodeRef}
+                className={`cursor-move absolute w-full h-full ${isMobile && canDrag ? "z-50" : ""}`}
+                onDoubleClick={handleReset}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                style={{
+                  paddingTop: isSafeAreaEnabled
+                    ? `${config.safeAreaHeight}px`
+                    : "0",
+                }}
+              >
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="w-full h-full object-cover pointer-events-none select-none block transition-transform duration-200 ease-out"
+                  style={{
+                    transform: `scale(${(zoom || 1) * (isMobile && canDrag ? 1.02 : 1)})`,
+                  }}
+                  crossOrigin={
+                    imageUrl?.startsWith("http") ? "anonymous" : undefined
+                  }
+                />
+              </div>
+            </Draggable>
+          </div>
+        ) : (
+          <Placeholder />
+        )}
+
+        {config.camera.type === "notch" && (
+          <div
+            className="absolute left-1/2 -translate-x-1/2 bg-black z-[70] flex items-center justify-center top-[-2px] rounded-b-xl"
+            style={{ width: "150px", height: "28px" }}
+          >
+            <div className="flex gap-4 items-center">
+              <div className="h-1 bg-white/10 rounded-full w-10" />
+              <div className="w-1.5 h-1.5 bg-indigo-900/40 rounded-full" />
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none rounded-[inherit] z-40" />
+    </>
+  );
+};
+
 export const DeviceFrame = forwardRef<HTMLDivElement, DeviceFrameProps>(
-  ({ config, imageUrl, isSafeAreaEnabled }, ref) => {
-    const isLaptop = config.category === 'laptop';
+  ({ config, imageUrl, isSafeAreaEnabled, zoom, theme, onReset }, ref) => {
+    const isLaptop = config.category === "laptop";
     const draggableNodeRef = useRef(null);
+    const [position, setPosition] = React.useState({ x: 0, y: 0 });
+
+    const [lastTap, setLastTap] = React.useState(0);
+    const [canDrag, setCanDrag] = React.useState(false);
+    const longPressTimer = React.useRef<any>(null);
+    const [isMobile, setIsMobile] = React.useState(false);
+
+    React.useEffect(() => {
+      const checkMobile = () => {
+        setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+      };
+      checkMobile();
+      window.addEventListener("resize", checkMobile);
+      return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    const handleReset = () => {
+      setPosition({ x: 0, y: 0 });
+      onReset?.();
+    };
+
+    const handleTouchStart = () => {
+      const now = Date.now();
+      // Double tap detection
+      if (now - lastTap < 300) {
+        handleReset();
+      }
+      setLastTap(now);
+
+      // Long press detection for mobile
+      if (isMobile) {
+        longPressTimer.current = setTimeout(() => {
+          setCanDrag(true);
+          // Haptic feedback if supported
+          if (window.navigator.vibrate) {
+            window.navigator.vibrate(50);
+          }
+        }, 600); // 600ms for long press
+      }
+    };
+
+    const handleTouchMove = () => {
+      // If user moves finger before long press timer finishes, cancel the timer
+      if (!canDrag && longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+      }
+      setCanDrag(false);
+    };
+
+    const handleDrag = (_e: any, data: { x: number; y: number }) => {
+      setPosition({ x: data.x, y: data.y });
+    };
+
+    const handleStart = () => {
+      if (isMobile && !canDrag) {
+        return false;
+      }
+      return true;
+    };
+
+    const sharedProps = {
+      config,
+      imageUrl,
+      isSafeAreaEnabled,
+      zoom,
+      position,
+      handleDrag,
+      handleReset,
+      handleStart,
+      handleTouchStart,
+      handleTouchMove,
+      handleTouchEnd,
+      canDrag,
+      isMobile,
+      draggableNodeRef,
+      theme,
+    };
 
     return (
-      <div className="flex flex-col items-center">
+      <div
+        className="flex flex-col items-center p-6 sm:p-16 overflow-visible"
+        ref={ref}
+      >
         <motion.div
-          ref={ref}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
           className={`relative p-[4px] bg-[#1a1c1e] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-800/50 ${
-            isLaptop ? 'origin-bottom' : ''
+            isLaptop ? "origin-bottom" : ""
           }`}
           style={{
             borderRadius: config.frameStyle.borderRadius,
-            width: `${config.dimensions.width}px`,
-            height: `${config.dimensions.height}px`,
+            width: config.dimensions.width,
+            height: config.dimensions.height,
           }}
         >
-          {/* Outer Frame / Bezel */}
           <div
-            className="w-full h-full bg-[#0c0c0c] relative overflow-hidden flex items-center justify-center ring-1 ring-white/10"
+            className={`w-full h-full relative ${config.frameStyle.bezelColor} overflow-visible`}
             style={{
               borderRadius: `calc(${config.frameStyle.borderRadius} - 4px)`,
             }}
           >
-            {/* Screen Content Container */}
-            <div
-              className="bg-slate-900 overflow-hidden relative shadow-inner w-full h-full"
-              style={{
-                borderRadius: config.screenStyle.borderRadius,
-              }}
-            >
-              {imageUrl ? (
-                <Draggable nodeRef={draggableNodeRef} bounds={false}>
-                  <div 
-                    ref={draggableNodeRef} 
-                    className="absolute inset-0 cursor-move"
-                    style={{
-                      top: isSafeAreaEnabled ? `${config.safeAreaHeight}px` : '0',
-                    }}
-                  >
-                    <img
-                      src={imageUrl}
-                      alt="Preview"
-                      className="w-full h-full object-cover pointer-events-none select-none transition-all duration-300"
-                      crossOrigin="anonymous"
-                    />
-                  </div>
-                </Draggable>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center p-12 text-center flex-col gap-4">
-                  <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center animate-pulse">
-                    <div className="w-6 h-6 border-2 border-slate-600 rounded-sm" />
-                  </div>
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-widest leading-relaxed">
-                    Upload to preview <br />
-                    <span className="opacity-50 text-[10px]">High Resolution</span>
-                  </p>
-                </div>
-              )}
-
-              {/* Status Bar Mockup (Mobile only) */}
-              {!isLaptop && (
-                <div className="absolute top-0 left-0 right-0 h-6 flex items-center justify-between px-6 z-10 pointer-events-none">
-                  <div className="text-[10px] font-bold text-white/40 tracking-tight">9:41</div>
-                  <div className="flex gap-1 items-center opacity-40">
-                    <div className="w-3.5 h-1.5 border border-white rounded-[2px]" />
-                    <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                  </div>
-                </div>
-              )}
-
-              {/* Punch Hole Camera */}
-              {config.camera.type === 'punch-hole' && (
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#050505] rounded-full z-30 shadow-inner flex items-center justify-center border border-white/5">
-                  <div className="w-1 h-1 bg-indigo-900/40 rounded-full blur-[0.5px]"></div>
-                </div>
-              )}
-
-              {/* Notch / Dynamic Island */}
-              {config.camera.type === 'notch' && (
-                <div
-                  className={`absolute left-1/2 -translate-x-1/2 bg-black z-30 flex items-center justify-center ${isLaptop ? 'top-[-2px] rounded-b-xl' : 'top-3 rounded-full'}`}
-                  style={{
-                    width: isLaptop ? '180px' : '85px',
-                    height: isLaptop ? '28px' : '28px',
-                  }}
-                >
-                  <div className="flex gap-4 items-center">
-                    <div className={`h-1 bg-white/10 rounded-full ${isLaptop ? 'w-10' : 'w-6'}`} />
-                    <div className="w-1.5 h-1.5 bg-indigo-900/40 rounded-full" />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Antenna Lines (Mobile only) */}
-            {!isLaptop && (
-              <>
-                <div className="absolute top-12 -left-px w-1 h-8 bg-slate-800/50"></div>
-                <div className="absolute bottom-12 -left-px w-1 h-8 bg-slate-800/50"></div>
-                <div className="absolute top-20 -right-px w-1 h-8 bg-slate-800/50"></div>
-              </>
+            {isLaptop ? (
+              <LaptopScreen {...sharedProps} />
+            ) : (
+              <MobileScreen {...sharedProps} />
             )}
           </div>
-
-          {/* Side Buttons (Mobile only) */}
-          {!isLaptop && (
-            <>
-              <div className="absolute top-32 -right-[2px] w-[3px] h-12 bg-[#2d3034] rounded-l-sm border-r border-slate-600/30" />
-              <div className="absolute top-48 -right-[2px] w-[3px] h-24 bg-[#2d3034] rounded-l-sm border-r border-slate-600/30" />
-            </>
-          )}
         </motion.div>
 
-        {/* Laptop Base (MacBook Style) */}
         {isLaptop && (
-          <div className="relative -mt-1 w-[110%] h-8 bg-[#1a1c1e] rounded-b-xl shadow-xl flex justify-center">
-            <div className="absolute top-0 w-32 h-2 bg-[#0c0c0c] rounded-b-lg" />
+          <div className="relative w-[110%] -ml-[5%] flex flex-col items-center">
+            <div className="w-full h-[12px] bg-gradient-to-b from-[#2a2c30] to-[#1a1c1e] rounded-t-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] flex justify-center">
+              <div className="w-1/4 h-[4px] bg-[#111] mt-1 rounded-sm opacity-50" />
+            </div>
+            <div className="w-full h-[6px] bg-[#111] rounded-b-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)]" />
           </div>
         )}
       </div>
     );
-  }
+  },
 );
-
-DeviceFrame.displayName = 'DeviceFrame';
+DeviceFrame.displayName = "DeviceFrame";
