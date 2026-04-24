@@ -1,0 +1,12 @@
+{
+  "name": "UltraFrame - Galaxy S26 Ultra Mockup",
+  "description": "A high-fidelity Samsung Galaxy S26 Ultra device mockup frame for professional image previews and showcases.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "Device Mockups",
+    "Image Processing",
+    "Responsive Design"
+  ]
+}
