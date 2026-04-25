@@ -326,7 +326,7 @@ export default function App() {
                 disabled={!uploadedImage}
                 className="px-4 py-3 bg-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95 text-center flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Download className="w-4 h-4" /> Download Mockup
+                <Download className="w-4 h-4" /> Export
               </button>
               <button
                 onClick={() => setShowSpecs(true)}

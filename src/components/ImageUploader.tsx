@@ -117,7 +117,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                   Mockup Live
                 </p>
                 <button
-                  onClick={onClear}
+                  onClick={() => fileInputRef.current?.click()}
                   className="text-[10px] font-semibold text-indigo-500 hover:text-indigo-600 transition-colors"
                 >
                   Replace File
