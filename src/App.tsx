@@ -7,26 +7,20 @@ import { useState, useRef, useCallback } from "react";
 import { motion } from "motion/react";
 import {
   Smartphone,
-  Layout,
-  Palette,
   ArrowRight,
   Download,
-  Laptop,
-  ShieldCheck,
-  Sun,
-  Moon,
-  Settings,
-  Check,
-  X,
-  RotateCcw,
   Github,
+  Settings,
+  Laptop,
 } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import { toPng } from "html-to-image";
 import { DeviceFrame } from "./components/DeviceFrame";
 import { ImageUploader } from "./components/ImageUploader";
+import { ConfirmModal } from "./components/ConfirmModal";
+import { SpecsModal } from "./components/SpecsModal";
+import { SettingsPopover } from "./components/SettingsPopover";
 import { DEVICES } from "./constants/devices";
-import Swal from "sweetalert2";
 
 export default function App() {
   const [selectedDevice, setSelectedDevice] = useState(DEVICES.s26_ultra);
@@ -36,6 +30,7 @@ export default function App() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isSafeAreaEnabled, setIsSafeAreaEnabled] = useState(false);
   const [showSpecs, setShowSpecs] = useState(false);
+  const [showConfirmNew, setShowConfirmNew] = useState(false);
   const [imageZoom, setImageZoom] = useState(1);
   const [deviceTheme, setDeviceTheme] = useState<"light" | "dark">("light");
   const [isImageLocked, setIsImageLocked] = useState(true);
@@ -96,30 +91,20 @@ export default function App() {
   }, [selectedDevice.id]);
 
   const handleNewProject = () => {
-    // if there is image uploaded, show a confirmation dialog using Swal.
     if (uploadedImage) {
-      Swal.fire({
-        title: "Are you sure?",
-        text: "You will lose all your unsaved work.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, start a new project",
-        cancelButtonText: "Cancel",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          setSelectedDevice(DEVICES.s26_ultra);
-          setUploadedImage(null);
-          setImageZoom(1);
-          setIsSafeAreaEnabled(false);
-          setDeviceTheme("light");
-        }
-      });
+      setShowConfirmNew(true);
     } else {
-      setSelectedDevice(DEVICES.s26_ultra);
-      setImageZoom(1);
-      setIsSafeAreaEnabled(false);
-      setDeviceTheme("light");
+      resetProject();
     }
+  };
+
+  const resetProject = () => {
+    setSelectedDevice(DEVICES.s26_ultra);
+    setUploadedImage(null);
+    setImageZoom(1);
+    setIsSafeAreaEnabled(false);
+    setDeviceTheme("light");
+    setShowConfirmNew(false);
   };
 
   const handleResetAll = () => {
@@ -239,261 +224,24 @@ export default function App() {
                   />
                 </button>
 
-                <AnimatePresence>
-                  {showSettings && (
-                    <>
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setShowSettings(false)}
-                        className="fixed inset-0 bg-slate-900/30 backdrop-blur-[4px] z-[90] lg:bg-transparent lg:backdrop-blur-none"
-                      />
-
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="fixed inset-x-4 bottom-6 lg:absolute lg:top-full lg:left-0 lg:bottom-auto lg:mt-3 lg:w-80 bg-white/95 backdrop-blur-xl rounded-2xl lg:rounded-3xl shadow-[0_40px_80px_rgba(0,0,0,0.25)] border border-slate-200/50 overflow-hidden z-[100]"
-                      >
-                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                            Configuration
-                          </span>
-                          <button
-                            onClick={() => setShowSettings(false)}
-                            className="p-1 hover:bg-slate-200 rounded-md transition-colors text-slate-400"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-
-                        <div className="p-3 space-y-1.5">
-                          {/* Theme Toggle */}
-                          <button
-                            onClick={() =>
-                              setDeviceTheme(
-                                deviceTheme === "light" ? "dark" : "light",
-                              )
-                            }
-                            className="w-full p-2.5 flex items-center justify-between rounded-xl hover:bg-slate-50 transition-colors group text-left"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`p-2 rounded-lg ${deviceTheme === "light" ? "bg-amber-100 text-amber-600" : "bg-slate-800 text-indigo-400"}`}
-                              >
-                                {deviceTheme === "light" ? (
-                                  <Sun className="w-4 h-4" />
-                                ) : (
-                                  <Moon className="w-4 h-4" />
-                                )}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="text-xs font-semibold text-slate-700">
-                                  Appearance
-                                </span>
-                                <span className="text-[9px] text-slate-400 capitalize font-medium">
-                                  {deviceTheme} Mode
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className={`w-9 h-5 rounded-full relative transition-colors ${deviceTheme === "dark" ? "bg-indigo-600" : "bg-slate-200"}`}
-                            >
-                              <div
-                                className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${deviceTheme === "dark" ? "left-5" : "left-1"}`}
-                              />
-                            </div>
-                          </button>
-
-                          {/* Safe Area Toggle */}
-                          <button
-                            onClick={() =>
-                              setIsSafeAreaEnabled(!isSafeAreaEnabled)
-                            }
-                            className="w-full p-2.5 flex items-center justify-between rounded-xl hover:bg-slate-50 transition-colors group text-left"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`p-2 rounded-lg ${isSafeAreaEnabled ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}
-                              >
-                                <ShieldCheck className="w-4 h-4" />
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="text-xs font-semibold text-slate-700">
-                                  Safe Area
-                                </span>
-                                <span className="text-[9px] text-slate-400 font-medium">
-                                  Avoid Notch Overlap
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className={`w-9 h-5 rounded-full relative transition-colors ${isSafeAreaEnabled ? "bg-indigo-600" : "bg-slate-200"}`}
-                            >
-                              <div
-                                className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${isSafeAreaEnabled ? "left-5" : "left-1"}`}
-                              />
-                            </div>
-                          </button>
-
-                          <div className="h-px bg-slate-100 mx-2 my-1" />
-
-                          {/* Navbar Toggle */}
-                          <button
-                            onClick={() => setShowStatusBar(!showStatusBar)}
-                            className="w-full p-2.5 flex items-center justify-between rounded-xl hover:bg-slate-50 transition-colors group text-left"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`p-2 rounded-lg ${showStatusBar ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}
-                              >
-                                <Smartphone className="w-4 h-4" />
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="text-xs font-semibold text-slate-700">
-                                  Device Navbar
-                                </span>
-                                <span className="text-[9px] text-slate-400 font-medium">
-                                  Status & Home Bar
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className={`w-9 h-5 rounded-full relative transition-colors ${showStatusBar ? "bg-indigo-600" : "bg-slate-200"}`}
-                            >
-                              <div
-                                className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${showStatusBar ? "left-5" : "left-1"}`}
-                              />
-                            </div>
-                          </button>
-
-                          {/* Notch Toggle */}
-                          <button
-                            onClick={() => setShowNotch(!showNotch)}
-                            className="w-full p-2.5 flex items-center justify-between rounded-xl hover:bg-slate-50 transition-colors group text-left"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`p-2 rounded-lg ${showNotch ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}
-                              >
-                                <div className="w-4 h-1.5 bg-current rounded-full opacity-60" />
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="text-xs font-semibold text-slate-700">
-                                  Display Notch
-                                </span>
-                                <span className="text-[9px] text-slate-400 font-medium">
-                                  Camera Cut-out
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className={`w-9 h-5 rounded-full relative transition-colors ${showNotch ? "bg-indigo-600" : "bg-slate-200"}`}
-                            >
-                              <div
-                                className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${showNotch ? "left-5" : "left-1"}`}
-                              />
-                            </div>
-                          </button>
-
-                          {/* Drag Mode Toggle - Mobile Only */}
-                          <div className="lg:hidden">
-                            <div className="h-px bg-slate-100 mx-2 my-1" />
-                            <button
-                              onClick={() => setIsImageLocked(!isImageLocked)}
-                              className="w-full p-2.5 flex items-center justify-between rounded-xl hover:bg-slate-50 transition-colors group text-left"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={`p-2 rounded-lg ${!isImageLocked ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}
-                                >
-                                  <Layout className="w-4 h-4" />
-                                </div>
-                                <div className="flex flex-col">
-                                  <span className="text-xs font-semibold text-slate-700">
-                                    Drag Mode
-                                  </span>
-                                  <span className="text-[9px] text-slate-400 font-medium">
-                                    {isImageLocked
-                                      ? "Locked (Gesture: Long-tap)"
-                                      : "Unlocked for positioning"}
-                                  </span>
-                                </div>
-                              </div>
-                              <div
-                                className={`w-9 h-5 rounded-full relative transition-colors ${!isImageLocked ? "bg-indigo-600" : "bg-slate-200"}`}
-                              >
-                                <div
-                                  className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${!isImageLocked ? "left-5" : "left-1"}`}
-                                />
-                              </div>
-                            </button>
-                          </div>
-
-                          {/* Image Zoom Control - Visible on all screens */}
-                          {uploadedImage && (
-                            <div className="mt-2 pt-2 border-t border-slate-100">
-                              <div className="p-2.5 bg-slate-50/50 rounded-2xl border border-slate-100/50">
-                                <div className="flex items-center justify-between mb-3 px-1">
-                                  <div className="flex flex-col">
-                                    <span className="text-[11px] font-bold text-slate-700">
-                                      Image Scale
-                                    </span>
-                                    <span className="text-[9px] text-slate-400 font-medium">
-                                      Fine-tune positioning
-                                    </span>
-                                  </div>
-                                  <span className="text-[10px] font-bold text-indigo-600 bg-white border border-indigo-100 px-2 py-0.5 rounded-lg shadow-sm">
-                                    {Math.round(imageZoom * 100)}%
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-3 px-1">
-                                  <span className="text-[10px] text-slate-400 font-bold">
-                                    A
-                                  </span>
-                                  <input
-                                    type="range"
-                                    min="0.1"
-                                    max="3"
-                                    step="0.01"
-                                    value={imageZoom}
-                                    onChange={(e) =>
-                                      setImageZoom(parseFloat(e.target.value))
-                                    }
-                                    className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                                  />
-                                  <span className="text-sm text-slate-400 font-bold">
-                                    A
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="bg-slate-50/50 p-2.5 flex items-center justify-between border-t border-slate-100">
-                          <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
-                              Live Sync Active
-                            </span>
-                          </div>
-                          <button
-                            onClick={handleResetAll}
-                            className="flex items-center gap-1.5 px-2 py-1 hover:bg-slate-200/70 rounded-md transition-all group"
-                            title="Reset all settings to default"
-                          >
-                            <span className="text-[9px] font-bold text-slate-400 group-hover:text-indigo-600 transition-colors uppercase">
-                              Reset
-                            </span>
-                            <RotateCcw className="w-3 h-3 text-slate-400 group-hover:text-indigo-600 group-active:rotate-[-180deg] transition-all duration-500" />
-                          </button>
-                        </div>
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
+                <SettingsPopover
+                  isOpen={showSettings}
+                  onClose={() => setShowSettings(false)}
+                  deviceTheme={deviceTheme}
+                  setDeviceTheme={setDeviceTheme}
+                  isSafeAreaEnabled={isSafeAreaEnabled}
+                  setIsSafeAreaEnabled={setIsSafeAreaEnabled}
+                  showStatusBar={showStatusBar}
+                  setShowStatusBar={setShowStatusBar}
+                  showNotch={showNotch}
+                  setShowNotch={setShowNotch}
+                  isImageLocked={isImageLocked}
+                  setIsImageLocked={setIsImageLocked}
+                  imageZoom={imageZoom}
+                  setImageZoom={setImageZoom}
+                  uploadedImage={uploadedImage}
+                  handleResetAll={handleResetAll}
+                />
               </div>
             </div>
 
@@ -542,7 +290,7 @@ export default function App() {
                 Developed by{" "}
                 <span
                   style={{ fontFamily: "'Babylonica'" }}
-                  className="text-xl font-bold"
+                  className="text-xl font-bold text-[#0d9488] sm:text-slate-400 hover:text-[#0d9488]"
                 >
                   Mustafa
                 </span>
@@ -579,80 +327,17 @@ export default function App() {
         </div>
       </main>
 
-      {/* Specs Modal */}
-      {showSpecs && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
-          >
-            <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">
-                {selectedDevice.name}
-              </h2>
-              <button
-                onClick={() => setShowSpecs(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
-              >
-                &times;
-              </button>
-            </div>
-            <div className="p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    Manufacturer
-                  </p>
-                  <p className="text-sm font-semibold text-slate-700">
-                    {selectedDevice.brand}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    Form Factor
-                  </p>
-                  <p className="text-sm font-semibold text-slate-700 capitalize">
-                    {selectedDevice.category}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    Canvas Width
-                  </p>
-                  <p className="text-sm font-semibold text-slate-700">
-                    {selectedDevice.dimensions.width}px
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    Canvas Height
-                  </p>
-                  <p className="text-sm font-semibold text-slate-700">
-                    {selectedDevice.dimensions.height}px
-                  </p>
-                </div>
-              </div>
-              <div className="pt-4 border-t border-slate-100">
-                <p className="text-xs text-slate-500 leading-relaxed italic">
-                  The {selectedDevice.name} configuration utilizes a
-                  titanium-grade chassis mockup with high-fidelity{" "}
-                  {selectedDevice.category === "mobile"
-                    ? "glass curvature"
-                    : "hinge"}{" "}
-                  physics.
-                </p>
-              </div>
-              <button
-                onClick={() => setShowSpecs(false)}
-                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold transition-all hover:bg-slate-800"
-              >
-                Close Specifications
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={showConfirmNew}
+        onClose={() => setShowConfirmNew(false)}
+        onConfirm={resetProject}
+      />
+
+      <SpecsModal
+        isOpen={showSpecs}
+        onClose={() => setShowSpecs(false)}
+        selectedDevice={selectedDevice}
+      />
     </div>
   );
 }

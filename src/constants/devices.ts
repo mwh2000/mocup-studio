@@ -17,7 +17,7 @@ export const DEVICES: Record<string, DeviceConfig> = {
       height: 693,
     },
     frameStyle: {
-      borderRadius: "24px",
+      borderRadius: "16px",
       borderWidth: "12px",
       bezelColor: "bg-neutral-900",
       shadow: "shadow-2xl shadow-black/50",
@@ -33,6 +33,8 @@ export const DEVICES: Record<string, DeviceConfig> = {
       color: "bg-black",
     },
     safeAreaHeight: 52,
+    description:
+      "Galaxy S26 Ultra configuration utilizes a titanium-reinforced chassis with a flat LTPO AMOLED display technology and advanced anti-reflective glass physics.",
   },
   iphone_17_pro_max: {
     id: "iphone_17_pro_max",
@@ -61,6 +63,8 @@ export const DEVICES: Record<string, DeviceConfig> = {
       color: "bg-black",
     },
     safeAreaHeight: 64,
+    description:
+      "iPhone 17 Pro Max features a Grade 5 titanium frame with refined Dynamic Island integration optimized for high-fidelity content rendering.",
   },
   macbook_pro_16: {
     id: "macbook_pro_16",
@@ -89,5 +93,7 @@ export const DEVICES: Record<string, DeviceConfig> = {
       color: "bg-black",
     },
     safeAreaHeight: 48,
+    description:
+      "MacBook Pro 16 features an aerospace-grade aluminum frame with precision-engineered bezel metrics optimized for high-fidelity professional workflows.",
   },
 };

@@ -30,4 +30,5 @@ export interface DeviceConfig {
     color: string;
   };
   safeAreaHeight: number;
+  description: string;
 }
