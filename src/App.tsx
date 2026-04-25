@@ -15,7 +15,11 @@ import {
   ShieldCheck,
   Sun,
   Moon,
+  Settings,
+  Check,
+  X,
 } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import { toPng } from "html-to-image";
 import { DeviceFrame } from "./components/DeviceFrame";
 import { ImageUploader } from "./components/ImageUploader";
@@ -31,8 +35,11 @@ export default function App() {
   const [isSafeAreaEnabled, setIsSafeAreaEnabled] = useState(false);
   const [showSpecs, setShowSpecs] = useState(false);
   const [imageZoom, setImageZoom] = useState(1);
-  const [deviceTheme, setDeviceTheme] = useState<"light" | "dark">("dark");
+  const [deviceTheme, setDeviceTheme] = useState<"light" | "dark">("light");
   const [isImageLocked, setIsImageLocked] = useState(true);
+  const [showStatusBar, setShowStatusBar] = useState(true);
+  const [showNotch, setShowNotch] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
 
   const mockupRef = useRef<HTMLDivElement>(null);
 
@@ -102,14 +109,14 @@ export default function App() {
           setUploadedImage(null);
           setImageZoom(1);
           setIsSafeAreaEnabled(false);
-          setDeviceTheme("dark");
+          setDeviceTheme("light");
         }
       });
     } else {
       setSelectedDevice(DEVICES.s26_ultra);
       setImageZoom(1);
       setIsSafeAreaEnabled(false);
-      setDeviceTheme("dark");
+      setDeviceTheme("light");
     }
   };
 
@@ -178,103 +185,240 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                  Features
-                </label>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {/* Safe Area Toggle */}
+            <div className="grid grid-cols-1 gap-3">
+              {/* Device Config Button */}
+              <div className="relative">
                 <button
-                  onClick={() => setIsSafeAreaEnabled(!isSafeAreaEnabled)}
-                  className={`p-3 rounded-xl border flex flex-col gap-3 transition-all text-left ${
-                    isSafeAreaEnabled
-                      ? "bg-indigo-50 border-indigo-200 text-indigo-700"
-                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                  onClick={() => setShowSettings(!showSettings)}
+                  className={`p-4 rounded-xl border flex items-center justify-between transition-all text-left w-full ${
+                    showSettings
+                      ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-inner"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 shadow-sm"
                   }`}
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <ShieldCheck
-                      className={`w-4 h-4 ${isSafeAreaEnabled ? "text-indigo-500" : "text-slate-300"}`}
-                    />
+                  <div className="flex items-center gap-3">
                     <div
-                      className={`w-7 h-3.5 rounded-full relative transition-colors ${isSafeAreaEnabled ? "bg-indigo-500" : "bg-slate-200"}`}
+                      className={`p-2 rounded-lg ${showSettings ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-400"}`}
                     >
-                      <div
-                        className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition-all ${isSafeAreaEnabled ? "left-4" : "left-0.5"}`}
+                      <Settings
+                        className={`w-4 h-4 ${showSettings ? "animate-spin-slow" : ""}`}
                       />
                     </div>
+                    <div>
+                      <p className="text-[11px] font-bold">Device Settings</p>
+                      <p className="text-[8px] opacity-70 font-medium uppercase tracking-wider">
+                        Appearance & Behavior
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[11px] font-bold">Safe Area</p>
-                    <p className="text-[8px] opacity-70 font-medium">
-                      Clear notch
-                    </p>
-                  </div>
+                  <ArrowRight
+                    className={`w-3.5 h-3.5 transition-transform ${showSettings ? "rotate-90 text-indigo-500" : "text-slate-300"}`}
+                  />
                 </button>
 
-                {/* Theme Toggle */}
-                <button
-                  onClick={() =>
-                    setDeviceTheme(deviceTheme === "light" ? "dark" : "light")
-                  }
-                  className={`p-3 rounded-xl border flex flex-col gap-3 transition-all text-left ${
-                    deviceTheme === "light"
-                      ? "bg-amber-50 border-amber-200 text-amber-700"
-                      : "bg-slate-800 border-slate-700 text-slate-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    {deviceTheme === "light" ? (
-                      <Sun className="w-4 h-4 text-amber-500" />
-                    ) : (
-                      <Moon className="w-4 h-4 text-indigo-400" />
-                    )}
-                    <div
-                      className={`w-7 h-3.5 rounded-full relative transition-colors ${deviceTheme === "light" ? "bg-amber-400" : "bg-slate-600"}`}
-                    >
-                      <div
-                        className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition-all ${deviceTheme === "dark" ? "left-4" : "left-0.5"}`}
+                <AnimatePresence>
+                  {showSettings && (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowSettings(false)}
+                        className="fixed inset-0 bg-slate-900/30 backdrop-blur-[4px] z-[90] lg:bg-transparent lg:backdrop-blur-none"
                       />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-bold">Theme</p>
-                    <p className="text-[8px] opacity-70 font-medium uppercase">
-                      {deviceTheme} mode
-                    </p>
-                  </div>
-                </button>
 
-                {/* Drag Lock Toggle - Mobile Only */}
-                <button
-                  onClick={() => setIsImageLocked(!isImageLocked)}
-                  className={`p-3 rounded-xl border flex flex-col gap-3 transition-all text-left md:hidden ${
-                    !isImageLocked
-                      ? "bg-indigo-50 border-indigo-200 text-indigo-700"
-                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <Layout
-                      className={`w-4 h-4 ${!isImageLocked ? "text-indigo-500" : "text-slate-300"}`}
-                    />
-                    <div
-                      className={`w-7 h-3.5 rounded-full relative transition-colors ${!isImageLocked ? "bg-indigo-500" : "bg-slate-200"}`}
-                    >
-                      <div
-                        className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition-all ${!isImageLocked ? "left-4" : "left-0.5"}`}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-bold">Drag Mode</p>
-                    <p className="text-[8px] opacity-70 font-medium uppercase">
-                      {isImageLocked ? "Locked" : "Unlocked"}
-                    </p>
-                  </div>
-                </button>
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="fixed inset-x-4 bottom-6 lg:absolute lg:top-full lg:left-0 lg:bottom-auto lg:mt-3 lg:w-80 bg-white/95 backdrop-blur-xl rounded-2xl lg:rounded-3xl shadow-[0_40px_80px_rgba(0,0,0,0.25)] border border-slate-200/50 overflow-hidden z-[100]"
+                      >
+                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                            Configuration
+                          </span>
+                          <button
+                            onClick={() => setShowSettings(false)}
+                            className="p-1 hover:bg-slate-200 rounded-md transition-colors text-slate-400"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="p-3 space-y-1.5">
+                          {/* Theme Toggle */}
+                          <button
+                            onClick={() =>
+                              setDeviceTheme(
+                                deviceTheme === "light" ? "dark" : "light",
+                              )
+                            }
+                            className="w-full p-2.5 flex items-center justify-between rounded-xl hover:bg-slate-50 transition-colors group text-left"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`p-2 rounded-lg ${deviceTheme === "light" ? "bg-amber-100 text-amber-600" : "bg-slate-800 text-indigo-400"}`}
+                              >
+                                {deviceTheme === "light" ? (
+                                  <Sun className="w-4 h-4" />
+                                ) : (
+                                  <Moon className="w-4 h-4" />
+                                )}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-xs font-semibold text-slate-700">
+                                  Appearance
+                                </span>
+                                <span className="text-[9px] text-slate-400 capitalize font-medium">
+                                  {deviceTheme} Mode
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className={`w-9 h-5 rounded-full relative transition-colors ${deviceTheme === "dark" ? "bg-indigo-600" : "bg-slate-200"}`}
+                            >
+                              <div
+                                className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${deviceTheme === "dark" ? "left-5" : "left-1"}`}
+                              />
+                            </div>
+                          </button>
+
+                          {/* Safe Area Toggle */}
+                          <button
+                            onClick={() =>
+                              setIsSafeAreaEnabled(!isSafeAreaEnabled)
+                            }
+                            className="w-full p-2.5 flex items-center justify-between rounded-xl hover:bg-slate-50 transition-colors group text-left"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`p-2 rounded-lg ${isSafeAreaEnabled ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}
+                              >
+                                <ShieldCheck className="w-4 h-4" />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-xs font-semibold text-slate-700">
+                                  Safe Area
+                                </span>
+                                <span className="text-[9px] text-slate-400 font-medium">
+                                  Avoid Notch Overlap
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className={`w-9 h-5 rounded-full relative transition-colors ${isSafeAreaEnabled ? "bg-indigo-600" : "bg-slate-200"}`}
+                            >
+                              <div
+                                className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${isSafeAreaEnabled ? "left-5" : "left-1"}`}
+                              />
+                            </div>
+                          </button>
+
+                          <div className="h-px bg-slate-100 mx-2 my-1" />
+
+                          {/* Navbar Toggle */}
+                          <button
+                            onClick={() => setShowStatusBar(!showStatusBar)}
+                            className="w-full p-2.5 flex items-center justify-between rounded-xl hover:bg-slate-50 transition-colors group text-left"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`p-2 rounded-lg ${showStatusBar ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}
+                              >
+                                <Smartphone className="w-4 h-4" />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-xs font-semibold text-slate-700">
+                                  Device Navbar
+                                </span>
+                                <span className="text-[9px] text-slate-400 font-medium">
+                                  Status & Home Bar
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className={`w-9 h-5 rounded-full relative transition-colors ${showStatusBar ? "bg-indigo-600" : "bg-slate-200"}`}
+                            >
+                              <div
+                                className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${showStatusBar ? "left-5" : "left-1"}`}
+                              />
+                            </div>
+                          </button>
+
+                          {/* Notch Toggle */}
+                          <button
+                            onClick={() => setShowNotch(!showNotch)}
+                            className="w-full p-2.5 flex items-center justify-between rounded-xl hover:bg-slate-50 transition-colors group text-left"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`p-2 rounded-lg ${showNotch ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}
+                              >
+                                <div className="w-4 h-1.5 bg-current rounded-full opacity-60" />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-xs font-semibold text-slate-700">
+                                  Display Notch
+                                </span>
+                                <span className="text-[9px] text-slate-400 font-medium">
+                                  Camera Cut-out
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className={`w-9 h-5 rounded-full relative transition-colors ${showNotch ? "bg-indigo-600" : "bg-slate-200"}`}
+                            >
+                              <div
+                                className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${showNotch ? "left-5" : "left-1"}`}
+                              />
+                            </div>
+                          </button>
+
+                          {/* Drag Mode Toggle - Mobile Only */}
+                          <div className="lg:hidden">
+                            <div className="h-px bg-slate-100 mx-2 my-1" />
+                            <button
+                              onClick={() => setIsImageLocked(!isImageLocked)}
+                              className="w-full p-2.5 flex items-center justify-between rounded-xl hover:bg-slate-50 transition-colors group text-left"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`p-2 rounded-lg ${!isImageLocked ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}
+                                >
+                                  <Layout className="w-4 h-4" />
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-semibold text-slate-700">
+                                    Drag Mode
+                                  </span>
+                                  <span className="text-[9px] text-slate-400 font-medium">
+                                    {isImageLocked
+                                      ? "Locked (Gesture: Long-tap)"
+                                      : "Unlocked for positioning"}
+                                  </span>
+                                </div>
+                              </div>
+                              <div
+                                className={`w-9 h-5 rounded-full relative transition-colors ${!isImageLocked ? "bg-indigo-600" : "bg-slate-200"}`}
+                              >
+                                <div
+                                  className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${!isImageLocked ? "left-5" : "left-1"}`}
+                                />
+                              </div>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="bg-slate-50/50 p-3 flex items-center gap-2 border-t border-slate-100">
+                          <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
+                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
+                            Live Sync Active
+                          </span>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
@@ -340,9 +484,13 @@ export default function App() {
           <div className="pt-8 border-t border-slate-200 tracking-widest">
             {/* copy right developed by Mustafa */}
             <div className="flex items-center justify-center">
-              <p className="text-sm text-slate-400 font-light">
+              <a
+                target="_blank"
+                href="https://mwhmustafa.vercel.app/"
+                className="text-sm text-slate-400 font-light hover:text-indigo-500 transition-all"
+              >
                 Developed by Mustafa
-              </p>
+              </a>
             </div>
           </div>
         </div>
@@ -368,11 +516,10 @@ export default function App() {
               theme={deviceTheme}
               isLocked={isImageLocked}
               onReset={() => setImageZoom(1)}
+              showStatusBar={showStatusBar}
+              showNotch={showNotch}
             />
           </div>
-
-          {/* Shadow Reflection */}
-          <div className="absolute bottom-4 sm:bottom-0 w-1/2 h-8 bg-slate-900/5 blur-3xl opacity-50"></div>
         </div>
       </main>
 

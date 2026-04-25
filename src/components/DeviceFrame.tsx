@@ -11,6 +11,8 @@ interface DeviceFrameProps {
   theme?: "light" | "dark";
   isLocked?: boolean;
   onReset?: () => void;
+  showStatusBar?: boolean;
+  showNotch?: boolean;
 }
 
 const Placeholder = ({ theme }: { theme?: "light" | "dark" }) => (
@@ -56,6 +58,8 @@ const MobileScreen = ({
   draggableNodeRef,
   theme,
   currentTime,
+  showStatusBar = true,
+  showNotch = true,
 }: any) => {
   const formattedTime = currentTime.toLocaleTimeString([], {
     hour: "numeric",
@@ -81,7 +85,7 @@ const MobileScreen = ({
             >
               <div
                 ref={draggableNodeRef}
-                className={`absolute ${!isLocked ? "cursor-move z-50 ring-2 ring-indigo-500/30" : ""}`}
+                className={`absolute ${!isLocked ? "cursor-move z-50" : ""}`}
                 onDoubleClick={handleReset}
                 onTouchStart={handleTouchStart}
                 style={{
@@ -135,30 +139,35 @@ const MobileScreen = ({
           <Placeholder theme={theme} />
         )}
 
-        <div className="absolute top-0 left-0 right-0 h-6 flex items-center justify-between px-6 z-[60] pointer-events-none">
+        {/* Status Bar */}
+        {showStatusBar && (
           <div
-            className={`text-[10px] font-bold tracking-tight ${theme === "light" ? "text-slate-900/60" : "text-white/40"}`}
-          >
-            {formattedTime}
-          </div>
-          <div
-            className={`flex gap-1 items-center ${theme === "light" ? "opacity-60" : "opacity-40"}`}
+            className={`absolute top-0 left-0 right-0 ${config.camera.type === "notch" ? "h-[44px]" : "h-[36px]"} flex items-center justify-between px-6 z-[60] pointer-events-none`}
           >
             <div
-              className={`w-3.5 h-1.5 border rounded-[2px] ${theme === "light" ? "border-slate-900" : "border-white"}`}
-            />
+              className={`text-[10px] font-bold tracking-tight ${theme === "light" ? "text-slate-900/60" : "text-white/40"}`}
+            >
+              {formattedTime}
+            </div>
             <div
-              className={`w-1.5 h-1.5 rounded-full ${theme === "light" ? "bg-slate-900" : "bg-white"}`}
-            />
+              className={`flex gap-1 items-center ${theme === "light" ? "opacity-60" : "opacity-40"}`}
+            >
+              <div
+                className={`w-3.5 h-1.5 border rounded-[2px] ${theme === "light" ? "border-slate-900" : "border-white"}`}
+              />
+              <div
+                className={`w-1.5 h-1.5 rounded-full ${theme === "light" ? "bg-slate-900" : "bg-white"}`}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
-        {config.camera.type === "punch-hole" && (
+        {showNotch && config.camera.type === "punch-hole" && (
           <div className="absolute top-3 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#050505] rounded-full z-[70] shadow-inner flex items-center justify-center border border-white/5">
             <div className="w-1 h-1 bg-indigo-900/40 rounded-full blur-[0.5px]"></div>
           </div>
         )}
-        {config.camera.type === "notch" && (
+        {showNotch && config.camera.type === "notch" && (
           <div
             className="absolute left-1/2 -translate-x-1/2 bg-black z-[70] flex items-center justify-center top-3 rounded-full"
             style={{ width: "75px", height: "20px" }}
@@ -167,6 +176,15 @@ const MobileScreen = ({
               <div className="h-1 bg-white/10 rounded-full w-6" />
               <div className="w-1.5 h-1.5 bg-indigo-900/40 rounded-full" />
             </div>
+          </div>
+        )}
+
+        {/* Home Indicator */}
+        {showStatusBar && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-28 h-1.5 z-[60] pointer-events-none">
+            <div
+              className={`w-full h-full rounded-full ${theme === "light" ? "bg-slate-900/30" : "bg-white/30"} backdrop-blur-sm`}
+            />
           </div>
         )}
       </div>
@@ -276,7 +294,17 @@ const LaptopScreen = ({
 
 export const DeviceFrame = forwardRef<HTMLDivElement, DeviceFrameProps>(
   (
-    { config, imageUrl, isSafeAreaEnabled, zoom, theme, isLocked, onReset },
+    {
+      config,
+      imageUrl,
+      isSafeAreaEnabled,
+      zoom,
+      theme,
+      isLocked,
+      onReset,
+      showStatusBar = true,
+      showNotch = true,
+    },
     ref,
   ) => {
     const isLaptop = config.category === "laptop";
@@ -337,6 +365,8 @@ export const DeviceFrame = forwardRef<HTMLDivElement, DeviceFrameProps>(
       draggableNodeRef,
       theme,
       currentTime,
+      showStatusBar,
+      showNotch,
     };
 
     return (
@@ -350,7 +380,7 @@ export const DeviceFrame = forwardRef<HTMLDivElement, DeviceFrameProps>(
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-          className={`relative p-[4px] bg-[#1a1c1e] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-800/50 ${
+          className={`relative p-[4px] bg-[#1a1c1e] border border-slate-800/50 ${
             isLaptop ? "origin-bottom" : ""
           }`}
           style={{
@@ -388,7 +418,7 @@ export const DeviceFrame = forwardRef<HTMLDivElement, DeviceFrameProps>(
             <div className="w-full h-[12px] bg-gradient-to-b from-[#2a2c30] to-[#1a1c1e] rounded-t-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] flex justify-center">
               <div className="w-1/4 h-[4px] bg-[#111] mt-1 rounded-sm opacity-50" />
             </div>
-            <div className="w-full h-[6px] bg-[#111] rounded-b-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)]" />
+            <div className="w-full h-[6px] bg-[#111] rounded-b-xl" />
           </div>
         )}
       </div>
