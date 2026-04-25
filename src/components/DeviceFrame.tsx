@@ -225,7 +225,7 @@ const LaptopScreen = ({
             >
               <div
                 ref={draggableNodeRef}
-                className={`absolute w-full h-full ${!isLocked ? "cursor-move z-50 ring-2 ring-indigo-500/30" : ""}`}
+                className={`absolute w-full h-full ${!isLocked ? "cursor-move z-50" : ""}`}
                 onDoubleClick={handleReset}
                 onTouchStart={handleTouchStart}
                 style={{
@@ -233,12 +233,14 @@ const LaptopScreen = ({
                     ? `${config.safeAreaHeight}px`
                     : "0",
                   touchAction: isLocked ? "auto" : "none",
+                  height: "fill",
+                  width: "fill",
                 }}
               >
                 <img
                   src={imageUrl}
                   alt="Preview"
-                  className="w-full h-full object-cover pointer-events-none select-none block transition-transform duration-200 ease-out"
+                  className="h-full object-cover m-auto pointer-events-none select-none block transition-transform duration-200 ease-out"
                   style={{
                     transform: `scale(${zoom || 1})`,
                   }}

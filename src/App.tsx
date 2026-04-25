@@ -18,6 +18,8 @@ import {
   Settings,
   Check,
   X,
+  RotateCcw,
+  Github,
 } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import { toPng } from "html-to-image";
@@ -120,29 +122,50 @@ export default function App() {
     }
   };
 
+  const handleResetAll = () => {
+    setIsSafeAreaEnabled(false);
+    setDeviceTheme("light");
+    setShowStatusBar(true);
+    setShowNotch(true);
+    setImageZoom(1);
+    setIsImageLocked(true);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-600 selection:text-white flex flex-col overflow-x-hidden">
-      <nav className="relative z-50 flex items-center justify-between px-6 md:px-12 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
-            <Smartphone className="w-5 h-5 text-white" />
+      <nav className="relative z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
+        <div className="container mx-auto px-4 md:px-16 lg:px-24 flex items-center justify-between py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
+              <Smartphone className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex flex-col -gap-1">
+              <span className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase leading-none">
+                Mockup Studio
+              </span>
+              <span className="text-[8px] font-light text-slate-400/80 tracking-widest">
+                by Mustafa
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col -gap-1">
-            <span className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase leading-none">
-              Mockup Studio
-            </span>
-            <span className="text-[8px] font-light text-slate-400/80 tracking-widest">
-              by Mustafa
-            </span>
+
+          <div className="flex items-center gap-4">
+            <a
+              target="_blank"
+              href="https://github.com/mwh2000/mocup-studio"
+              className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
+              title="View on GitHub"
+            >
+              <Github className="w-5 h-5" />
+            </a>
+            <button
+              onClick={handleNewProject}
+              className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-all active:scale-95 flex items-center gap-2"
+            >
+              New Project
+            </button>
           </div>
         </div>
-
-        <button
-          onClick={handleNewProject}
-          className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-all active:scale-95 flex items-center gap-2"
-        >
-          New Project
-        </button>
       </nav>
 
       <main className="flex-1 relative z-10 container mx-auto flex flex-col lg:flex-row items-start justify-center pt-0 md:pt-4 pb-8 px-4 md:px-16 lg:px-24 gap-4 lg:gap-24">
@@ -407,13 +430,65 @@ export default function App() {
                               </div>
                             </button>
                           </div>
+
+                          {/* Image Zoom Control - Visible on all screens */}
+                          {uploadedImage && (
+                            <div className="mt-2 pt-2 border-t border-slate-100">
+                              <div className="p-2.5 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+                                <div className="flex items-center justify-between mb-3 px-1">
+                                  <div className="flex flex-col">
+                                    <span className="text-[11px] font-bold text-slate-700">
+                                      Image Scale
+                                    </span>
+                                    <span className="text-[9px] text-slate-400 font-medium">
+                                      Fine-tune positioning
+                                    </span>
+                                  </div>
+                                  <span className="text-[10px] font-bold text-indigo-600 bg-white border border-indigo-100 px-2 py-0.5 rounded-lg shadow-sm">
+                                    {Math.round(imageZoom * 100)}%
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3 px-1">
+                                  <span className="text-[10px] text-slate-400 font-bold">
+                                    A
+                                  </span>
+                                  <input
+                                    type="range"
+                                    min="0.1"
+                                    max="3"
+                                    step="0.01"
+                                    value={imageZoom}
+                                    onChange={(e) =>
+                                      setImageZoom(parseFloat(e.target.value))
+                                    }
+                                    className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                  />
+                                  <span className="text-sm text-slate-400 font-bold">
+                                    A
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
-                        <div className="bg-slate-50/50 p-3 flex items-center gap-2 border-t border-slate-100">
-                          <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
-                            Live Sync Active
-                          </span>
+                        <div className="bg-slate-50/50 p-2.5 flex items-center justify-between border-t border-slate-100">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
+                              Live Sync Active
+                            </span>
+                          </div>
+                          <button
+                            onClick={handleResetAll}
+                            className="flex items-center gap-1.5 px-2 py-1 hover:bg-slate-200/70 rounded-md transition-all group"
+                            title="Reset all settings to default"
+                          >
+                            <span className="text-[9px] font-bold text-slate-400 group-hover:text-indigo-600 transition-colors uppercase">
+                              Reset
+                            </span>
+                            <RotateCcw className="w-3 h-3 text-slate-400 group-hover:text-indigo-600 group-active:rotate-[-180deg] transition-all duration-500" />
+                          </button>
                         </div>
                       </motion.div>
                     </>
@@ -439,31 +514,6 @@ export default function App() {
               />
             </div>
 
-            {uploadedImage && (
-              <div className="flex flex-col gap-3 p-4 bg-white border border-slate-200 rounded-xl">
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Image Zoom
-                  </label>
-                  <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md">
-                    {Math.round(imageZoom * 100)}%
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="3"
-                  step="0.01"
-                  value={imageZoom}
-                  onChange={(e) => setImageZoom(parseFloat(e.target.value))}
-                  className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                />
-                <p className="text-[9px] text-slate-400 font-medium">
-                  Double-click image in preview to reset
-                </p>
-              </div>
-            )}
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
               <button
                 onClick={handleDownload}
@@ -487,9 +537,15 @@ export default function App() {
               <a
                 target="_blank"
                 href="https://mwhmustafa.vercel.app/"
-                className="text-sm text-slate-400 font-light hover:text-indigo-500 transition-all"
+                className="text-sm text-slate-400 font-light hover:text-[#0d9488] transition-all"
               >
-                Developed by Mustafa
+                Developed by{" "}
+                <span
+                  style={{ fontFamily: "'Babylonica'" }}
+                  className="text-xl font-bold"
+                >
+                  Mustafa
+                </span>
               </a>
             </div>
           </div>
