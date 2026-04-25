@@ -32,6 +32,7 @@ export default function App() {
   const [showSpecs, setShowSpecs] = useState(false);
   const [imageZoom, setImageZoom] = useState(1);
   const [deviceTheme, setDeviceTheme] = useState<"light" | "dark">("dark");
+  const [isImageLocked, setIsImageLocked] = useState(true);
 
   const mockupRef = useRef<HTMLDivElement>(null);
 
@@ -45,11 +46,25 @@ export default function App() {
     try {
       // First, ensure all images in the mockup are loaded and have crossOrigin="anonymous"
       // already set in the component. We use toPng with specific options for better compatibility.
-      const dataUrl = await toPng(mockupRef.current, {
+      const node = mockupRef.current;
+      const dataUrl = await toPng(node, {
         pixelRatio: 4,
+        width: node.scrollWidth,
+        height: node.scrollHeight,
+        filter: (node: any) => {
+          // Exclude nodes with data-no-export attribute
+          if (
+            node.getAttribute &&
+            node.getAttribute("data-no-export") === "true"
+          ) {
+            return false;
+          }
+          return true;
+        },
         style: {
           transform: "scale(1)",
           margin: "0",
+          padding: "0",
         },
       });
 
@@ -99,7 +114,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-600 selection:text-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-600 selection:text-white flex flex-col overflow-x-hidden">
       <nav className="relative z-50 flex items-center justify-between px-6 md:px-12 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
@@ -123,7 +138,7 @@ export default function App() {
         </button>
       </nav>
 
-      <main className="flex-1 relative z-10 container mx-auto flex flex-col lg:flex-row items-start justify-center pt-0 md:pt-4 pb-8 px-8 md:px-16 lg:px-24 gap-4 lg:gap-24">
+      <main className="flex-1 relative z-10 container mx-auto flex flex-col lg:flex-row items-start justify-center pt-0 md:pt-4 pb-8 px-4 md:px-16 lg:px-24 gap-4 lg:gap-24">
         {/* Left Column: Controls */}
         <div className="w-full lg:w-1/3 flex flex-col gap-6 md:gap-10 order-2 lg:order-1">
           <header>
@@ -131,8 +146,8 @@ export default function App() {
               Pick. Fit.{" "}
               <span className="font-semibold text-slate-800">Export.</span>
             </h1>
-            <p className="text-slate-500 text-[13px] mt-3 leading-relaxed font-medium max-w-md tracking-widest">
-              Ready in seconds
+            <p className="text-slate-500 text-[13px] mt-3 leading-relaxed font-normal max-w-md tracking-widest">
+              Ready in seconds, free forever
             </p>
           </header>
 
@@ -231,6 +246,35 @@ export default function App() {
                     </p>
                   </div>
                 </button>
+
+                {/* Drag Lock Toggle - Mobile Only */}
+                <button
+                  onClick={() => setIsImageLocked(!isImageLocked)}
+                  className={`p-3 rounded-xl border flex flex-col gap-3 transition-all text-left md:hidden ${
+                    !isImageLocked
+                      ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <Layout
+                      className={`w-4 h-4 ${!isImageLocked ? "text-indigo-500" : "text-slate-300"}`}
+                    />
+                    <div
+                      className={`w-7 h-3.5 rounded-full relative transition-colors ${!isImageLocked ? "bg-indigo-500" : "bg-slate-200"}`}
+                    >
+                      <div
+                        className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition-all ${!isImageLocked ? "left-4" : "left-0.5"}`}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold">Drag Mode</p>
+                    <p className="text-[8px] opacity-70 font-medium uppercase">
+                      {isImageLocked ? "Locked" : "Unlocked"}
+                    </p>
+                  </div>
+                </button>
               </div>
             </div>
 
@@ -322,6 +366,7 @@ export default function App() {
               isSafeAreaEnabled={isSafeAreaEnabled}
               zoom={imageZoom}
               theme={deviceTheme}
+              isLocked={isImageLocked}
               onReset={() => setImageZoom(1)}
             />
           </div>
