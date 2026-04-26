@@ -15,32 +15,66 @@ interface DeviceFrameProps {
   showNotch?: boolean;
 }
 
-const Placeholder = ({ theme }: { theme?: "light" | "dark" }) => (
+const BrandLogo = ({
+  brand,
+  theme,
+}: {
+  brand: string;
+  theme?: "light" | "dark";
+}) => {
+  const isApple = brand.toLowerCase() === "apple";
+  const iconColor = theme === "light" ? "text-slate-900" : "text-white";
+
+  if (isApple) {
+    return (
+      <svg
+        className={`w-8 h-8 ${iconColor} opacity-80`}
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M17.05 20.28c-.98.95-2.05 1.79-3.48 1.79-1.42 0-1.89-.87-3.51-.87-1.61 0-2.14.85-3.48.87-1.4.02-2.31-.76-3.48-1.92C1.1 18.14 0 14.52 0 11.23c0-5.27 3.32-8.06 6.53-8.06 1.71 0 3.31.7 4.36 1.15 1.05.45 2.11-.11 4.39-.11 2.2 0 4.14 1.18 5.17 2.89-4.32 1.93-3.6 7.64.91 9.48-.8 2.05-1.98 3.51-3.31 4.7zM12.03 3.25C11.95 1.08 13.74 0 13.74 0s.13 2.13-1.71 3.25z" />
+      </svg>
+    );
+  }
+
+  return (
+    <div className={`flex flex-col items-center ${iconColor} opacity-80`}>
+      <span className="text-sm font-black tracking-tighter leading-none">
+        SAMSUNG
+      </span>
+    </div>
+  );
+};
+
+// نمرر الـ config هنا لنعرف البراند
+const Placeholder = ({
+  config,
+  theme,
+}: {
+  config: DeviceConfig;
+  theme?: "light" | "dark";
+}) => (
   <div
-    className={`absolute inset-0 flex flex-col items-center justify-center text-center p-6 ${theme === "light" ? "bg-white" : "bg-[#0a0a0a]"}`}
+    className={`absolute inset-0 flex flex-col items-center justify-center text-center p-6 ${
+      theme === "light" ? "bg-white" : "bg-[#0a0a0a]"
+    }`}
   >
     <div
-      className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 border ${theme === "light" ? "bg-indigo-50 border-indigo-100" : "bg-indigo-500/20 border-indigo-500/30"}`}
+      className={`flex items-center justify-center mb-6 transition-colors duration-500`}
     >
-      <svg
-        className="w-6 h-6 text-indigo-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-        />
-      </svg>
+      {/* استدعاء مكون اللوجو بناءً على البراند */}
+      <BrandLogo brand={config.brand} theme={theme} />
     </div>
+
     <p
-      className={`text-xs font-medium uppercase tracking-widest leading-relaxed ${theme === "light" ? "text-slate-400" : "text-slate-500"}`}
+      className={`text-[10px] font-bold uppercase tracking-[0.2em] leading-relaxed ${
+        theme === "light" ? "text-slate-400" : "text-slate-500"
+      }`}
     >
-      Upload to preview <br />
-      <span className="opacity-50 text-[10px]">High Resolution</span>
+      {config.name} <br />
+      <span className="opacity-40 font-light mt-1 block">
+        Upload to preview
+      </span>
     </p>
   </div>
 );
@@ -136,7 +170,7 @@ const MobileScreen = ({
             )}
           </div>
         ) : (
-          <Placeholder theme={theme} />
+          <Placeholder config={config} theme={theme} />
         )}
 
         {/* Status Bar */}
@@ -274,7 +308,7 @@ const LaptopScreen = ({
             )}
           </div>
         ) : (
-          <Placeholder theme={theme} />
+          <Placeholder config={config} theme={theme} />
         )}
 
         {config.camera.type === "notch" && (

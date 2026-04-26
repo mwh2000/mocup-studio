@@ -7,9 +7,18 @@
 [![React](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6-purple?style=flat-square&logo=vite)](https://vitejs.dev/)
 [![Tailwind](https://img.shields.io/badge/Tailwind-4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![License](https://img.shields.io/badge/License-Apache_2.0-orange?style=flat-square)](LICENSE)
 
-**Mockup Studio** is a high-fidelity web application designed to help developers and designers showcase their mobile and web interfaces inside premium device frames. Built with a focus on performance, aesthetics, and user experience.
+<video autoplay loop muted playsinline width="900">
+  <source src="docs/demo.mp4" type="video/mp4" playbackRate="1.5" />
+</video>
+<p>
+  <em>
+    Live preview of the application interface — 
+    <a href="https://mwh-mockup-studio.vercel.app" target="_blank">🚀 View Live Demo</a>
+  </em>
+</p>
+
+**Mockup Studio** helps developers and designers showcase their UI inside high-quality device frames — fast, simple, and beautiful.
 
 </div>
 

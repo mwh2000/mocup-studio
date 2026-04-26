@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion } from "motion/react";
 import {
   Smartphone,
@@ -37,6 +37,29 @@ export default function App() {
   const [showStatusBar, setShowStatusBar] = useState(true);
   const [showNotch, setShowNotch] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [showNav, setShowNav] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (Math.abs(currentScrollY - lastScrollY) < 10) return;
+
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        // scrolling down
+        setShowNav(false);
+      } else {
+        // scrolling up
+        setShowNav(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   const mockupRef = useRef<HTMLDivElement>(null);
 
@@ -118,42 +141,54 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-600 selection:text-white flex flex-col overflow-x-hidden">
-      <nav className="relative z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 md:px-16 lg:px-24 flex items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
-              <Smartphone className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex flex-col -gap-1">
-              <span className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase leading-none">
-                Mockup Studio
-              </span>
-              <span className="text-[8px] font-light text-slate-400/80 tracking-widest">
-                by Mustafa
-              </span>
-            </div>
-          </div>
+      <nav
+        className={`fixed top-6 left-0 right-0 z-50 transition-all duration-300 ${
+          showNav ? "translate-y-0 opacity-100" : "-translate-y-24 opacity-0"
+        }`}
+      >
+        <div className="container mx-auto px-4 md:px-16 lg:px-24">
+          <div className="backdrop-blur-xl bg-white/60 border border-white/30 rounded-2xl px-4 md:px-6 lg:px-8">
+            <div className="flex items-center justify-between py-3">
+              {/* Left */}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
+                  <Smartphone className="w-5 h-5 text-white" />
+                </div>
 
-          <div className="flex items-center gap-4">
-            <a
-              target="_blank"
-              href="https://github.com/mwh2000/mocup-studio"
-              className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
-              title="View on GitHub"
-            >
-              <Github className="w-5 h-5" />
-            </a>
-            <button
-              onClick={handleNewProject}
-              className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-all active:scale-95 flex items-center gap-2"
-            >
-              New Project
-            </button>
+                <div className="flex flex-col leading-none">
+                  <span className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase">
+                    Mockup Studio
+                  </span>
+                  <span className="text-[8px] font-light text-slate-400/80 tracking-widest">
+                    by Mustafa
+                  </span>
+                </div>
+              </div>
+
+              {/* Right */}
+              <div className="flex items-center gap-3 md:gap-4">
+                <a
+                  target="_blank"
+                  href="https://github.com/mwh2000/mocup-studio"
+                  className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
+                >
+                  <Github className="w-5 h-5" />
+                </a>
+
+                <button
+                  onClick={handleNewProject}
+                  className="px-4 md:px-5 py-2 bg-slate-900/90 backdrop-blur rounded-xl text-white text-xs font-semibold hover:bg-slate-800 transition-all active:scale-95 flex items-center gap-2"
+                >
+                  New Project
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </nav>
 
-      <main className="flex-1 relative z-10 container mx-auto flex flex-col lg:flex-row items-start justify-center pt-0 md:pt-4 pb-8 px-4 md:px-16 lg:px-24 gap-4 lg:gap-24">
+      <main className="flex-1 relative z-10 container mx-auto flex flex-col lg:flex-row items-center justify-center pt-10 md:pt-24 pb-8 px-8 md:px-16 lg:px-32 gap-4 lg:gap-24">
+        {" "}
         {/* Left Column: Controls */}
         <div className="w-full lg:w-1/3 flex flex-col gap-6 md:gap-10 order-2 lg:order-1">
           <header>
@@ -201,7 +236,7 @@ export default function App() {
                   className={`p-4 rounded-xl border flex items-center justify-between transition-all text-left w-full ${
                     showSettings
                       ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-inner"
-                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 shadow-sm"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -280,17 +315,16 @@ export default function App() {
           </div>
 
           <div className="pt-8 border-t border-slate-200 tracking-widest">
-            {/* copy right developed by Mustafa */}
             <div className="flex items-center justify-center">
               <a
                 target="_blank"
                 href="https://mwhmustafa.vercel.app/"
-                className="text-sm text-slate-400 font-light hover:text-[#0d9488] transition-all"
+                className="group text-sm text-slate-400 font-light transition-colors duration-300 hover:text-[#0d9488]"
               >
                 Developed by{" "}
                 <span
                   style={{ fontFamily: "'Babylonica'" }}
-                  className="text-xl font-bold text-[#0d9488] sm:text-slate-400 hover:text-[#0d9488]"
+                  className="text-xl font-bold text-[#0d9488] sm:text-slate-400 transition-colors duration-300 group-hover:text-[#0d9488]"
                 >
                   Mustafa
                 </span>
@@ -298,7 +332,6 @@ export default function App() {
             </div>
           </div>
         </div>
-
         {/* Right Column: Preview */}
         <div className="w-full lg:w-2/3 flex items-center justify-center relative order-1 lg:order-2 overflow-visible py-0 sm:py-4 lg:-mt-12">
           {/* Ambient Glow */}
