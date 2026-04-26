@@ -8,9 +8,8 @@
 [![Vite](https://img.shields.io/badge/Vite-6-purple?style=flat-square&logo=vite)](https://vitejs.dev/)
 [![Tailwind](https://img.shields.io/badge/Tailwind-4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 
-<video autoplay loop muted playsinline width="900">
-  <source src="docs/demo.mp4" type="video/mp4" playbackRate="1.5" />
-</video>
+<img src="docs/screenshot.png" alt="Mockup Studio Preview" width="900"/>
+
 <p>
   <em>
     Live preview of the application interface — 
