@@ -68,7 +68,7 @@ export const DEVICES: Record<string, DeviceConfig> = {
   },
   macbook_pro_16: {
     id: "macbook_pro_16",
-    name: 'MacBook Pro 16"',
+    name: "MacBook Pro 16",
     brand: "Apple",
     category: "laptop",
     aspectRatio: 16 / 10,
